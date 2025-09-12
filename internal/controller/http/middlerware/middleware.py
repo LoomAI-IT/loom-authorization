@@ -14,14 +14,12 @@ class HttpMiddleware(interface.IHttpMiddleware):
     def __init__(
             self,
             tel: interface.ITelemetry,
-            kontur_authorization_client: interface.IKonturAuthorizationClient,
             prefix: str,
     ):
         self.tracer = tel.tracer()
         self.meter = tel.meter()
         self.logger = tel.logger()
         self.prefix = prefix
-        self.kontur_authorization_client = kontur_authorization_client
 
     def trace_middleware01(self, app: FastAPI):
         @app.middleware("http")
@@ -230,45 +228,3 @@ class HttpMiddleware(interface.IHttpMiddleware):
                 raise
 
         return _logger_middleware03
-
-    def authorization_middleware04(self, app: FastAPI):
-        @app.middleware("http")
-        async def _authorization_middleware04(
-                request: Request,
-                call_next: Callable
-        ):
-            with self.tracer.start_as_current_span(
-                    "HttpMiddleware.authorization_middleware04",
-                    kind=SpanKind.INTERNAL,
-            ) as span:
-                try:
-                    access_token = request.cookies.get("Access-Token")
-                    if not access_token:
-                        authorization_data = model.AuthorizationData(
-                            account_id=0,
-                            message="guest",
-                            code=200,
-                        )
-                    else:
-                        authorization_data = await self.kontur_authorization_client.check_authorization(access_token)
-
-                    request.state.authorization_data = authorization_data
-
-                    if authorization_data.code == common.StatusCode.CodeErrAccessTokenExpired:
-                        self.logger.warning("Токен истек")
-                        return JSONResponse(status_code=401, content={"error": "access token expired"})
-
-                    elif authorization_data.code == common.StatusCode.CodeErrAccessTokenInvalid:
-                        self.logger.warning("Токен не валиден")
-                        return JSONResponse(status_code=403, content={"error": "access token invalid"})
-
-                    response = await call_next(request)
-
-                    span.set_status(Status(StatusCode.OK))
-                    return response
-                except Exception as e:
-                    span.record_exception(e)
-                    span.set_status(Status(StatusCode.ERROR, str(e)))
-                    raise e
-
-        return _authorization_middleware04

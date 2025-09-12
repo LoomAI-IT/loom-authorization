@@ -20,7 +20,12 @@ class IAuthorizationController(Protocol):
 
 class IAuthorizationService(Protocol):
     @abstractmethod
-    async def create_tokens(self, account_id: int) -> model.JWTToken: pass
+    async def create_tokens(
+            self,
+            account_id: int,
+            two_fa_status: bool,
+            role: str,
+    ) -> model.JWTToken: pass
 
     @abstractmethod
     async def check_token(self, token: str) -> model.TokenPayload: pass

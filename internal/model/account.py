@@ -33,3 +33,5 @@ class JWTToken:
 class TokenPayload:
     account_id: int
     two_fa_status: bool
+    role: str
+    exp: int

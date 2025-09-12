@@ -12,4 +12,5 @@ class AuthorizationResponse(BaseModel):
 class CheckAuthorizationResponse(BaseModel):
     account_id: int
     two_fa_status: bool
+    role: str
     message: str

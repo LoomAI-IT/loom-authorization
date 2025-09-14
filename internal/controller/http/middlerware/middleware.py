@@ -222,6 +222,7 @@ class HttpMiddleware(interface.IHttpMiddleware):
                     common.HTTP_REQUEST_DURATION_KEY: time.time() - start_time,
                     common.HTTP_STATUS_KEY: 500,
                     common.ERROR_KEY: str(err),
+                    common.TRACEBACK_KEY: traceback.format_exc()
                 }
 
                 self.logger.error(f"Обработка HTTP запроса завершена с ошибкой", extra_log)

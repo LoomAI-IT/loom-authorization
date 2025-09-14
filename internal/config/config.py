@@ -37,3 +37,5 @@ class Config:
         # Настройки OpenTelemetry
         self.otlp_host = os.getenv("KONTUR_OTEL_COLLECTOR_CONTAINER_NAME", "kontur-otel-collector")
         self.otlp_port = int(os.getenv("KONTUR_OTEL_COLLECTOR_GRPC_PORT", "4317"))
+
+        self.openai_api_key = os.getenv("OPENAI_API_KEY", "")

@@ -1,4 +1,5 @@
 import time
+import traceback
 from typing import Callable
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse

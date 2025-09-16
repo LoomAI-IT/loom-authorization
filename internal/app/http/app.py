@@ -39,7 +39,7 @@ def include_authorization_handlers(
 ):
     # Авторизация (создание токенов)
     app.add_api_route(
-        prefix + "/authorization",
+        prefix,
         authorization_controller.authorization,
         tags=["Authorization"],
         methods=["POST"],

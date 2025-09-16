@@ -6,7 +6,7 @@ openai==1.57.0
 httpx==0.28.1
 python-weed==0.8.0
 python-multipart
-jwt
+PyJWT
 
 
 hiredis==3.2.1

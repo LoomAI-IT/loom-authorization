@@ -46,6 +46,15 @@ def include_authorization_handlers(
         response_model=AuthorizationResponse,
     )
 
+    # Авторизация (создание токенов)
+    app.add_api_route(
+        prefix + "/tg",
+        authorization_controller.authorization_tg,
+        tags=["Authorization"],
+        methods=["POST"],
+        response_model=AuthorizationResponse,
+    )
+
     # Проверка токена
     app.add_api_route(
         prefix + "/check",

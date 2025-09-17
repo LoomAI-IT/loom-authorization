@@ -12,10 +12,16 @@ class IAuthorizationController(Protocol):
     async def authorization(self, body: AuthorizationBody): pass
 
     @abstractmethod
+    async def authorization_tg(self, body: AuthorizationBody): pass
+
+    @abstractmethod
     async def check_authorization(self, request: Request): pass
 
     @abstractmethod
     async def refresh_token(self, request: Request): pass
+
+    @abstractmethod
+    async def refresh_token_tg(self, request: Request): pass
 
 
 class IAuthorizationService(Protocol):
@@ -28,10 +34,21 @@ class IAuthorizationService(Protocol):
     ) -> model.JWTToken: pass
 
     @abstractmethod
+    async def create_tokens_tg(
+            self,
+            account_id: int,
+            two_fa_status: bool,
+            role: str,
+    ) -> model.JWTToken: pass
+
+    @abstractmethod
     async def check_token(self, token: str) -> model.TokenPayload: pass
 
     @abstractmethod
     async def refresh_token(self, refresh_token: str) -> model.JWTToken: pass
+
+    @abstractmethod
+    async def refresh_token_tg(self, refresh_token: str) -> model.JWTToken: pass
 
 
 class IAuthorizationRepo(Protocol):

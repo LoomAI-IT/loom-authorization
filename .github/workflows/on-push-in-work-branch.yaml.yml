@@ -91,5 +91,8 @@ jobs:
                     export $(cat env/dev/.env.app env/dev/.env.db env/dev/.env.monitoring | xargs)
                     docker compose -f ./docker-compose/app.yaml up -d --build kontur-authorization
                     
+                    python3 script/tg_bot_alert.py "✅ Ветка kontur-authorization/${{ env.BRANCH_NAME }} успешно обновлена на сервере ${{ env.SERVER_HOST }}!"
+                    
+                    
                     echo "✅ Ветка ${{ env.BRANCH_NAME }} успешно обновлена на сервере ${{ env.SERVER_HOST }}!"
                     EOF

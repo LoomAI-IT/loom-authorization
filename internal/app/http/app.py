@@ -76,7 +76,13 @@ def include_authorization_handlers(
 def include_db_handler(app: FastAPI, db: interface.IDB, prefix: str):
     app.add_api_route(prefix + "/table/create", create_table_handler(db), methods=["GET"])
     app.add_api_route(prefix + "/table/drop", drop_table_handler(db), methods=["GET"])
+    app.add_api_route(prefix + "/health", heath_check_handler(), methods=["GET"])
 
+def heath_check_handler():
+    async def heath_check():
+        return "ok"
+
+    return heath_check
 
 def create_table_handler(db: interface.IDB):
     async def create_table():

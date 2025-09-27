@@ -5,7 +5,7 @@ from internal import interface
 from pkg.client.client import AsyncHTTPClient
 
 
-class KonturAuthorizationClient(interface.IKonturAuthorizationClient):
+class LoomAuthorizationClient(interface.ILoomAuthorizationClient):
     def __init__(
             self,
             tel: interface.ITelemetry,
@@ -24,7 +24,7 @@ class KonturAuthorizationClient(interface.IKonturAuthorizationClient):
 
     async def authorization(self, account_id: int) -> model.JWTTokens:
         with self.tracer.start_as_current_span(
-                "KonturAuthorizationClient.authorization",
+                "LoomAuthorizationClient.authorization",
                 kind=SpanKind.CLIENT,
                 attributes={
                     "account_id": account_id
@@ -46,7 +46,7 @@ class KonturAuthorizationClient(interface.IKonturAuthorizationClient):
 
     async def check_authorization(self, access_token: str) -> model.AuthorizationData:
         with self.tracer.start_as_current_span(
-                "KonturAuthorizationClient.check_authorization",
+                "LoomAuthorizationClient.check_authorization",
                 kind=SpanKind.CLIENT,
         ) as span:
             try:

@@ -62,7 +62,7 @@ authorization_controller = AuthorizationController(
     cfg.domain
 )
 
-# Инициализация middleware (без клиента Kontur Authorization для этого сервиса)
+# Инициализация middleware (без клиента Loom Authorization для этого сервиса)
 http_middleware = HttpMiddleware(
     tel,
     cfg.prefix,

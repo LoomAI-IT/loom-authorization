@@ -107,7 +107,8 @@ class AuthorizationController(interface.IAuthorizationController):
                         account_id=token_payload.account_id,
                         two_fa_status=token_payload.two_fa_status,
                         role=token_payload.role,
-                        message="Access-Token verified"
+                        message="Access-Token verified",
+                        status_code=200
                     ).model_dump(),
                 )
             except jwt.ExpiredSignatureError as e:
@@ -115,16 +116,28 @@ class AuthorizationController(interface.IAuthorizationController):
                 span.record_exception(e)
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 return JSONResponse(
-                    status_code=403,
-                    content={"message": "token expired"}
+                    status_code=200,
+                    content=CheckAuthorizationResponse(
+                        account_id=-1,
+                        two_fa_status=False,
+                        role="",
+                        message="token expired",
+                        status_code=403
+                    ).model_dump(),
                 )
             except jwt.InvalidTokenError as e:
                 self.logger.warning("Токен не валиден")
                 span.record_exception(e)
                 span.set_status(Status(StatusCode.ERROR, str(e)))
                 return JSONResponse(
-                    status_code=403,
-                    content={"message": "token invalid"}
+                    status_code=200,
+                    content=CheckAuthorizationResponse(
+                        account_id=-1,
+                        two_fa_status=False,
+                        role="",
+                        message="token invalid",
+                        status_code=403
+                    ).model_dump(),
                 )
             except Exception as e:
                 span.record_exception(e)

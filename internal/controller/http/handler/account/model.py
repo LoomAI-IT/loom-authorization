@@ -14,3 +14,4 @@ class CheckAuthorizationResponse(BaseModel):
     two_fa_status: bool
     role: str
     message: str
+    status_code: int

@@ -160,18 +160,16 @@ class AuthorizationController(interface.IAuthorizationController):
                 response.set_cookie(
                     key="Access-Token",
                     value=jwt_token.access_token,
-                    expires=datetime.now() + timedelta(minutes=15),
                     httponly=True,
-                    path="/",
-                    domain=self.domain
+                    secure=True,
+                    samesite="lax"
                 )
                 response.set_cookie(
                     key="Refresh-Token",
                     value=jwt_token.refresh_token,
-                    expires=datetime.now() + timedelta(hours=1),
                     httponly=True,
-                    path="/",
-                    domain=self.domain
+                    secure=True,
+                    samesite="lax"
                 )
 
                 span.set_status(Status(StatusCode.OK))
@@ -222,18 +220,16 @@ class AuthorizationController(interface.IAuthorizationController):
                 response.set_cookie(
                     key="Access-Token",
                     value=jwt_token.access_token,
-                    expires=datetime.now() + timedelta(minutes=15),
                     httponly=True,
-                    path="/",
-                    domain=self.domain
+                    secure=True,
+                    samesite="lax"
                 )
                 response.set_cookie(
                     key="Refresh-Token",
                     value=jwt_token.refresh_token,
-                    expires=datetime.now() + timedelta(hours=1),
                     httponly=True,
-                    path="/",
-                    domain=self.domain
+                    secure=True,
+                    samesite="lax"
                 )
 
                 span.set_status(Status(StatusCode.OK))

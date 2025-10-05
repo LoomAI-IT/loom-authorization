@@ -37,8 +37,8 @@ class AuthorizationService(interface.IAuthorizationService):
             try:
                 account = await self.authorization_repo.account_by_id(account_id)
                 if not account:
+                    self.logger.info("Аккаунт не найден, создаем новый")
                     await self.authorization_repo.create_account(account_id)
-                    self.logger.info("Создали новый аккаунт")
 
                     account = await self.authorization_repo.account_by_id(account_id)
                 account = account[0]
@@ -85,8 +85,8 @@ class AuthorizationService(interface.IAuthorizationService):
             try:
                 account = await self.authorization_repo.account_by_id(account_id)
                 if not account:
+                    self.logger.info("Аккаунт не найден, создаем новый")
                     await self.authorization_repo.create_account(account_id)
-                    self.logger.info("Создали новый аккаунт")
 
                     account = await self.authorization_repo.account_by_id(account_id)
                 account = account[0]
@@ -127,7 +127,6 @@ class AuthorizationService(interface.IAuthorizationService):
                     key=self.jwt_secret_key,
                     algorithms=["HS256"]
                 )
-                self.logger.debug("Расшифровали access токен")
 
                 span.set_status(StatusCode.OK)
                 return model.TokenPayload(
@@ -149,6 +148,7 @@ class AuthorizationService(interface.IAuthorizationService):
             try:
                 account = await self.authorization_repo.account_by_refresh_token(refresh_token)
                 if not account:
+                    self.logger.info("Аккаунт не найден по refresh токену")
                     raise common.ErrAccountNotFound()
 
                 token_payload = await self.check_token(refresh_token)
@@ -173,6 +173,7 @@ class AuthorizationService(interface.IAuthorizationService):
             try:
                 account = await self.authorization_repo.account_by_refresh_token(refresh_token)
                 if not account:
+                    self.logger.info("Аккаунт не найден по refresh токену")
                     raise common.ErrAccountNotFound()
 
                 token_payload = await self.check_token(refresh_token)

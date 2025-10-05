@@ -88,7 +88,7 @@ class CircuitBreaker:
 
             return result
 
-        except self.expected_exceptions as e:
+        except self.expected_exceptions as err:
             await self._record_failure()
             raise
 
@@ -312,7 +312,7 @@ class AsyncHTTPClient:
             response.raise_for_status()
             return response
 
-        except Exception as e:
+        except Exception as err:
             raise
 
     async def _request_with_retry(
@@ -363,12 +363,6 @@ class AsyncHTTPClient:
                             f"за {elapsed:.2f}с. Следующая попытка через {next_delay:.2f}с. "
                             f"Ошибка: {e.__class__.__name__}: {str(e)}"
                         )
-                    else:
-                        self.logger.error(
-                            f"Запрос {method} {url} окончательно провален "
-                            f"после {retry_count + 1} попыток за {elapsed:.2f}с. "
-                            f"Ошибка: {e.__class__.__name__}: {str(e)}"
-                        )
 
                     raise
         return None
@@ -401,7 +395,7 @@ class AsyncHTTPClient:
                 response.raise_for_status()
                 async for chunk in response.aiter_bytes(chunk_size):
                     yield chunk
-        except Exception as e:
+        except Exception as err:
             raise
 
     async def download_file(
@@ -431,7 +425,7 @@ class AsyncHTTPClient:
                         if progress_callback:
                             progress_callback(downloaded, total)
 
-        except Exception as e:
+        except Exception as err:
             if file_path.exists():
                 file_path.unlink()
             raise

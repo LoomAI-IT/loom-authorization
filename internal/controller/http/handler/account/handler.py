@@ -1,8 +1,7 @@
 import jwt
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from datetime import datetime, timedelta
-from opentelemetry.trace import Status, StatusCode, SpanKind
+from opentelemetry.trace import StatusCode, SpanKind
 
 from internal import interface
 from internal import model
@@ -37,13 +36,15 @@ class AuthorizationController(interface.IAuthorizationController):
                 }
         ) as span:
             try:
+                self.logger.info("Начало операции авторизации")
                 jwt_token: model.JWTToken = await self.authorization_service.create_tokens(
                     account_id,
                     two_fa_status,
                     role
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                self.logger.info("Завершение операции авторизации")
+                span.set_status(StatusCode.OK)
                 return JSONResponse(
                     status_code=200,
                     content=AuthorizationResponse(
@@ -51,10 +52,9 @@ class AuthorizationController(interface.IAuthorizationController):
                         refresh_token=jwt_token.refresh_token
                     ).model_dump(),
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise e
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
 
     async def authorization_tg(self, body: AuthorizationBody):
         account_id = body.account_id
@@ -70,13 +70,15 @@ class AuthorizationController(interface.IAuthorizationController):
                 }
         ) as span:
             try:
+                self.logger.info("Начало операции авторизации Telegram")
                 jwt_token: model.JWTToken = await self.authorization_service.create_tokens_tg(
                     account_id,
                     two_fa_status,
                     role
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                self.logger.info("Завершение операции авторизации Telegram")
+                span.set_status(StatusCode.OK)
                 return JSONResponse(
                     status_code=200,
                     content=AuthorizationResponse(
@@ -84,10 +86,9 @@ class AuthorizationController(interface.IAuthorizationController):
                         refresh_token=jwt_token.refresh_token
                     ).model_dump(),
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise e
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
 
     async def check_authorization(self, request: Request):
         with self.tracer.start_as_current_span(
@@ -95,12 +96,14 @@ class AuthorizationController(interface.IAuthorizationController):
                 kind=SpanKind.INTERNAL
         ) as span:
             try:
+                self.logger.info("Начало операции проверки авторизации")
                 access_token = request.cookies.get("Access-Token")
                 token_payload = await self.authorization_service.check_token(
                     access_token,
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                self.logger.info("Завершение операции проверки авторизации")
+                span.set_status(StatusCode.OK)
                 return JSONResponse(
                     status_code=200,
                     content=CheckAuthorizationResponse(
@@ -111,10 +114,10 @@ class AuthorizationController(interface.IAuthorizationController):
                         status_code=200
                     ).model_dump(),
                 )
-            except jwt.ExpiredSignatureError as e:
+            except jwt.ExpiredSignatureError as err:
                 self.logger.warning("Токен истек")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=200,
                     content=CheckAuthorizationResponse(
@@ -125,10 +128,10 @@ class AuthorizationController(interface.IAuthorizationController):
                         status_code=403
                     ).model_dump(),
                 )
-            except jwt.InvalidTokenError as e:
+            except jwt.InvalidTokenError as err:
                 self.logger.warning("Токен не валиден")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=200,
                     content=CheckAuthorizationResponse(
@@ -139,18 +142,17 @@ class AuthorizationController(interface.IAuthorizationController):
                         status_code=403
                     ).model_dump(),
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise e
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
 
     async def refresh_token(self, request: Request):
         with self.tracer.start_as_current_span(
                 "AuthorizationController.refresh_token",
                 kind=SpanKind.INTERNAL
         ) as span:
-
             try:
+                self.logger.info("Начало операции обновления токена")
                 refresh_token = request.cookies.get("Refresh-Token")
                 jwt_token = await self.authorization_service.refresh_token(
                     refresh_token,
@@ -172,36 +174,36 @@ class AuthorizationController(interface.IAuthorizationController):
                     samesite="lax"
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                self.logger.info("Завершение операции обновления токена")
+                span.set_status(StatusCode.OK)
                 return response
-            except common.ErrAccountNotFound as e:
+            except common.ErrAccountNotFound as err:
                 self.logger.warning("Не найден аккаунт")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=400,
                     content={"message": "account not found"}
                 )
-            except jwt.ExpiredSignatureError as e:
+            except jwt.ExpiredSignatureError as err:
                 self.logger.warning("Токен истек")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=403,
                     content={"message": "token expired"}
                 )
-            except jwt.InvalidTokenError as e:
+            except jwt.InvalidTokenError as err:
                 self.logger.warning("Токен не валиден")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=403,
                     content={"message": "token invalid"}
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise e
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err
 
 
     async def refresh_token_tg(self, request: Request):
@@ -209,8 +211,8 @@ class AuthorizationController(interface.IAuthorizationController):
                 "AuthorizationController.refresh_token_tg",
                 kind=SpanKind.INTERNAL
         ) as span:
-
             try:
+                self.logger.info("Начало операции обновления токена Telegram")
                 refresh_token = request.cookies.get("Refresh-Token")
                 jwt_token = await self.authorization_service.refresh_token_tg(
                     refresh_token,
@@ -232,33 +234,33 @@ class AuthorizationController(interface.IAuthorizationController):
                     samesite="lax"
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                self.logger.info("Завершение операции обновления токена Telegram")
+                span.set_status(StatusCode.OK)
                 return response
-            except common.ErrAccountNotFound as e:
+            except common.ErrAccountNotFound as err:
                 self.logger.warning("Не найден аккаунт")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=400,
                     content={"message": "account not found"}
                 )
-            except jwt.ExpiredSignatureError as e:
+            except jwt.ExpiredSignatureError as err:
                 self.logger.warning("Токен истек")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=403,
                     content={"message": "token expired"}
                 )
-            except jwt.InvalidTokenError as e:
+            except jwt.InvalidTokenError as err:
                 self.logger.warning("Токен не валиден")
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 return JSONResponse(
                     status_code=403,
                     content={"message": "token invalid"}
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
-                raise e
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
+                raise err

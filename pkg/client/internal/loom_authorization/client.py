@@ -37,11 +37,11 @@ class LoomAuthorizationClient(interface.ILoomAuthorizationClient):
                 response = await self.client.post("/", json=body)
                 json_response = response.json()
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return model.JWTTokens(**json_response)
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+            except Exception as err:
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def check_authorization(self, access_token: str) -> model.AuthorizationData:
@@ -54,9 +54,9 @@ class LoomAuthorizationClient(interface.ILoomAuthorizationClient):
                 response = await self.client.get("/check", cookies=cookies)
                 json_response = response.json()
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return model.AuthorizationData(**json_response)
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+            except Exception as err:
+                
+                span.set_status(StatusCode.ERROR, str(err))
                 raise

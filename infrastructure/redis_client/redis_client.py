@@ -44,8 +44,8 @@ class RedisClient(interface.IRedis):
             if ttl:
                 return await client.setex(key, ttl, serialized_value)
             return await client.set(key, serialized_value)
-        except Exception as e:
-            raise e
+        except Exception as err:
+            raise err
 
     async def get(self, key: str, default: Any = None) -> Any:
         try:
@@ -54,7 +54,7 @@ class RedisClient(interface.IRedis):
             if value is None:
                 return default
             return self._deserialize_value(value)
-        except Exception as e:
+        except Exception as err:
             return default
 
     async def get_async_client(self) -> aioredis.Redis:
@@ -87,7 +87,7 @@ class RedisClient(interface.IRedis):
             if self.async_pool:
                 asyncio.create_task(self.async_pool.aclose())
             self.pool.disconnect()
-        except Exception as e:
+        except Exception as err:
             pass
 
     def __enter__(self):

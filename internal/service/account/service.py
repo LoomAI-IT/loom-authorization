@@ -1,7 +1,7 @@
 import jwt
 import time
 
-from opentelemetry.trace import Status, StatusCode, SpanKind
+from opentelemetry.trace import StatusCode, SpanKind
 
 from internal import interface
 from internal import common
@@ -60,13 +60,12 @@ class AuthorizationService(interface.IAuthorizationService):
                 refresh_token = jwt.encode(refresh_token_payload, self.jwt_secret_key, algorithm="HS256")
 
                 await self.authorization_repo.update_refresh_token(account.id, refresh_token)
-                self.logger.debug("Обновили refresh токен в БД")
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return model.JWTToken(access_token, refresh_token)
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def create_tokens_tg(
@@ -109,13 +108,12 @@ class AuthorizationService(interface.IAuthorizationService):
                 refresh_token = jwt.encode(refresh_token_payload, self.jwt_secret_key, algorithm="HS256")
 
                 await self.authorization_repo.update_refresh_token(account.id, refresh_token)
-                self.logger.debug("Обновили refresh токен в БД")
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return model.JWTToken(access_token, refresh_token)
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def check_token(self, token: str) -> model.TokenPayload:
@@ -131,16 +129,16 @@ class AuthorizationService(interface.IAuthorizationService):
                 )
                 self.logger.debug("Расшифровали access токен")
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return model.TokenPayload(
                     account_id=int(payload["account_id"]),
                     two_fa_status=bool(payload["two_fa_status"]),
                     role=payload["role"],
                     exp=int(payload["exp"]),
                 )
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def refresh_token(self, refresh_token: str) -> model.JWTToken:
@@ -160,11 +158,11 @@ class AuthorizationService(interface.IAuthorizationService):
                     token_payload.role
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return jwt_token
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
                 raise
 
     async def refresh_token_tg(self, refresh_token: str) -> model.JWTToken:
@@ -184,9 +182,9 @@ class AuthorizationService(interface.IAuthorizationService):
                     token_payload.role
                 )
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return jwt_token
-            except Exception as e:
-                span.record_exception(e)
-                span.set_status(Status(StatusCode.ERROR, str(e)))
+
+            except Exception as err:
+                span.set_status(StatusCode.ERROR, str(err))
                 raise

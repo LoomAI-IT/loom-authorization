@@ -41,7 +41,7 @@ class MigrationManager:
 
             print(f"📋 MigrationManager: Все миграции: {list(migrations.keys())}", flush=True)
             return migrations
-        except Exception as e:
+        except Exception as err:
             print(f"❌ MigrationManager: ОШИБКА загрузки миграций: {e}", flush=True)
             return {}
 
@@ -79,7 +79,7 @@ class MigrationManager:
             applied = {row[0] for row in rows}
             print(f"📊 MigrationManager: Применённые версии: {applied if applied else 'нет'}", flush=True)
             return applied
-        except Exception as e:
+        except Exception as err:
             print(f"ℹ️  MigrationManager: Примененных версий пока нет (таблица не существует?): {e}", flush=True)
             return set()
 
@@ -165,7 +165,7 @@ class MigrationManager:
             print("═══════════════════════════════════════════════════════════", flush=True)
             print("", flush=True)
             return count
-        except Exception as e:
+        except Exception as err:
             print("", flush=True)
             print("═══════════════════════════════════════════════════════════", flush=True)
             print(f"❌ MigrationManager: ОШИБКА во время миграции: {e}", flush=True)
@@ -233,7 +233,7 @@ class MigrationManager:
             print("═══════════════════════════════════════════════════════════", flush=True)
             print("", flush=True)
             return count
-        except Exception as e:
+        except Exception as err:
             print("", flush=True)
             print("═══════════════════════════════════════════════════════════", flush=True)
             print(f"❌ MigrationManager: ОШИБКА во время отката: {e}", flush=True)
@@ -254,7 +254,7 @@ class MigrationManager:
             print("✅ MigrationManager: Все таблицы успешно удалены", flush=True)
             print("═══════════════════════════════════════════════════════════", flush=True)
             print("", flush=True)
-        except Exception as e:
+        except Exception as err:
             print(f"❌ MigrationManager: ОШИБКА удаления таблиц: {e}", flush=True)
             print("═══════════════════════════════════════════════════════════", flush=True)
             print("", flush=True)

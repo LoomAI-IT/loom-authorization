@@ -1,4 +1,4 @@
-from opentelemetry.trace import SpanKind, Status, StatusCode
+from opentelemetry.trace import SpanKind, StatusCode
 
 from .sql_query import *
 from internal import model
@@ -24,10 +24,10 @@ class AccountRepo(interface.IAuthorizationRepo):
                 }
                 await self.db.insert(create_account, args)
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
+
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def account_by_id(self, account_id: int) -> list[model.Account]:
@@ -43,11 +43,11 @@ class AccountRepo(interface.IAuthorizationRepo):
                 rows = await self.db.select(account_by_id, args)
                 accounts = model.Account.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return accounts
+
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def account_by_refresh_token(self, refresh_token: str) -> list[model.Account]:
@@ -63,11 +63,11 @@ class AccountRepo(interface.IAuthorizationRepo):
                 rows = await self.db.select(account_by_refresh_token, args)
                 accounts = model.Account.serialize(rows) if rows else []
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
                 return accounts
+
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err
 
     async def update_refresh_token(self, account_id: int, refresh_token: str) -> None:
@@ -86,8 +86,8 @@ class AccountRepo(interface.IAuthorizationRepo):
                 }
                 await self.db.update(update_refresh_token, args)
 
-                span.set_status(Status(StatusCode.OK))
+                span.set_status(StatusCode.OK)
+
             except Exception as err:
-                span.record_exception(err)
-                span.set_status(Status(StatusCode.ERROR, str(err)))
+                span.set_status(StatusCode.ERROR, str(err))
                 raise err

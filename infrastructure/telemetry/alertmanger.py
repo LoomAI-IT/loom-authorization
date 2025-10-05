@@ -94,7 +94,7 @@ class AlertManager:
                 llm_analysis = await self.generate_analysis(traceback)
                 if llm_analysis:
                     text += f"\n\n{llm_analysis}"
-            except Exception as e:
+            except Exception as err:
                 print(f"Ошибка при генерации анализа LLM: {e}", flush=True)
                 text += f"\n\n<i>⚠️ Анализ LLM временно недоступен</i>"
 
@@ -117,7 +117,7 @@ class AlertManager:
                 reply_markup=keyboard,
                 parse_mode=ParseMode.HTML
             )
-        except Exception as e:
+        except Exception as err:
             print(f"Ошибка при отправке сообщения в Telegram: {e}", flush=True)
 
             simple_text = f"🚨 Ошибка в сервисе {self.service_name}\nTraceID: {trace_id}"

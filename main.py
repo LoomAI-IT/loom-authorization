@@ -1,3 +1,5 @@
+from contextvars import ContextVar
+
 import uvicorn
 
 from infrastructure.pg.pg import PG
@@ -16,6 +18,8 @@ from internal.config.config import Config
 
 # Загрузка конфигурации
 cfg = Config()
+
+log_context: ContextVar[dict] = ContextVar('log_context', default={})
 
 # Инициализация системы мониторинга
 alert_manager = AlertManager(
@@ -39,6 +43,7 @@ tel = Telemetry(
     cfg.service_version,
     cfg.otlp_host,
     cfg.otlp_port,
+    log_context,
     alert_manager
 )
 
@@ -66,6 +71,7 @@ authorization_controller = AuthorizationController(
 http_middleware = HttpMiddleware(
     tel,
     cfg.prefix,
+    log_context
 )
 
 if __name__ == "__main__":

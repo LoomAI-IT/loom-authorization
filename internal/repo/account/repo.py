@@ -1,8 +1,7 @@
-from opentelemetry.trace import SpanKind, StatusCode
-
 from .sql_query import *
-from internal import model
-from internal import interface
+from internal import model, interface
+
+from pkg.trace_wrapper import traced_method
 
 
 class AccountRepo(interface.IAuthorizationRepo):
@@ -10,84 +9,33 @@ class AccountRepo(interface.IAuthorizationRepo):
         self.db = db
         self.tracer = tel.tracer()
 
+    @traced_method()
     async def create_account(self, account_id: int) -> None:
-        with self.tracer.start_as_current_span(
-                "AccountRepo.create_account",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "account_id": account_id,
-                }
-        ) as span:
-            try:
-                args = {
-                    'account_id': account_id,
-                }
-                await self.db.insert(create_account, args)
+        args = {
+            'account_id': account_id,
+        }
+        await self.db.insert(create_account, args)
 
-                span.set_status(StatusCode.OK)
-
-            except Exception as err:
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def account_by_id(self, account_id: int) -> list[model.Account]:
-        with self.tracer.start_as_current_span(
-                "AccountRepo.account_by_id",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "account_id": account_id,
-                }
-        ) as span:
-            try:
-                args = {'account_id': account_id}
-                rows = await self.db.select(account_by_id, args)
-                accounts = model.Account.serialize(rows) if rows else []
+        args = {'account_id': account_id}
+        rows = await self.db.select(account_by_id, args)
+        accounts = model.Account.serialize(rows) if rows else []
 
-                span.set_status(StatusCode.OK)
-                return accounts
+        return accounts
 
-            except Exception as err:
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def account_by_refresh_token(self, refresh_token: str) -> list[model.Account]:
-        with self.tracer.start_as_current_span(
-                "AccountRepo.account_by_refresh_token",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "refresh_token_length": len(refresh_token) if refresh_token else 0,
-                }
-        ) as span:
-            try:
-                args = {'refresh_token': refresh_token}
-                rows = await self.db.select(account_by_refresh_token, args)
-                accounts = model.Account.serialize(rows) if rows else []
+        args = {'refresh_token': refresh_token}
+        rows = await self.db.select(account_by_refresh_token, args)
+        accounts = model.Account.serialize(rows) if rows else []
 
-                span.set_status(StatusCode.OK)
-                return accounts
+        return accounts
 
-            except Exception as err:
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
-
+    @traced_method()
     async def update_refresh_token(self, account_id: int, refresh_token: str) -> None:
-        with self.tracer.start_as_current_span(
-                "AccountRepo.update_refresh_token",
-                kind=SpanKind.INTERNAL,
-                attributes={
-                    "account_id": account_id,
-                    "refresh_token_length": len(refresh_token) if refresh_token else 0,
-                }
-        ) as span:
-            try:
-                args = {
-                    'account_id': account_id,
-                    'refresh_token': refresh_token,
-                }
-                await self.db.update(update_refresh_token, args)
-
-                span.set_status(StatusCode.OK)
-
-            except Exception as err:
-                span.set_status(StatusCode.ERROR, str(err))
-                raise err
+        args = {
+            'account_id': account_id,
+            'refresh_token': refresh_token,
+        }
+        await self.db.update(update_refresh_token, args)

@@ -1,3 +1,5 @@
+import asyncio
+
 import jwt
 import time
 
@@ -30,6 +32,8 @@ class AuthorizationService(interface.IAuthorizationService):
             await self.authorization_repo.create_account(account_id)
 
             account = await self.authorization_repo.account_by_id(account_id)
+            await asyncio.sleep(1)
+
         account = account[0]
 
         access_token_payload = {
@@ -65,6 +69,8 @@ class AuthorizationService(interface.IAuthorizationService):
             await self.authorization_repo.create_account(account_id)
 
             account = await self.authorization_repo.account_by_id(account_id)
+            await asyncio.sleep(1)
+
         account = account[0]
 
         access_token_payload = {

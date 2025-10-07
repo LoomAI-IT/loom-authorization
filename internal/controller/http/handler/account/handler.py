@@ -3,6 +3,7 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 
 from internal import interface, common, model
+from pkg.log_wrapper import auto_log
 from .model import *
 
 from pkg.trace_wrapper import traced_method
@@ -20,19 +21,15 @@ class AuthorizationController(interface.IAuthorizationController):
         self.authorization_service = authorization_service
         self.domain = domain
 
+    @auto_log()
     @traced_method()
     async def authorization(self, body: AuthorizationBody):
-        account_id = body.account_id
-        two_fa_status = body.two_fa_status
-        role = body.role
-        self.logger.info("Начало операции авторизации")
         jwt_token: model.JWTToken = await self.authorization_service.create_tokens(
-            account_id,
-            two_fa_status,
-            role
+            body.account_id,
+            body.two_fa_status,
+            body.role
         )
 
-        self.logger.info("Завершение операции авторизации")
         return JSONResponse(
             status_code=200,
             content=AuthorizationResponse(
@@ -41,19 +38,15 @@ class AuthorizationController(interface.IAuthorizationController):
             ).model_dump(),
         )
 
+    @auto_log()
     @traced_method()
     async def authorization_tg(self, body: AuthorizationBody):
-        account_id = body.account_id
-        two_fa_status = body.two_fa_status
-        role = body.role
-        self.logger.info("Начало операции авторизации Telegram")
         jwt_token: model.JWTToken = await self.authorization_service.create_tokens_tg(
-            account_id,
-            two_fa_status,
-            role
+            body.account_id,
+            body.two_fa_status,
+            body.role
         )
 
-        self.logger.info("Завершение операции авторизации Telegram")
         return JSONResponse(
             status_code=200,
             content=AuthorizationResponse(
@@ -62,16 +55,15 @@ class AuthorizationController(interface.IAuthorizationController):
             ).model_dump(),
         )
 
+    @auto_log()
     @traced_method()
     async def check_authorization(self, request: Request):
         try:
-            self.logger.info("Начало операции проверки авторизации")
             access_token = request.cookies.get("Access-Token")
             token_payload = await self.authorization_service.check_token(
                 access_token,
             )
 
-            self.logger.info("Завершение операции проверки авторизации")
             return JSONResponse(
                 status_code=200,
                 content=CheckAuthorizationResponse(
@@ -109,10 +101,10 @@ class AuthorizationController(interface.IAuthorizationController):
                 ).model_dump(),
             )
 
+    @auto_log()
     @traced_method()
     async def refresh_token(self, request: Request):
         try:
-            self.logger.info("Начало операции обновления токена")
             refresh_token = request.cookies.get("Refresh-Token")
             jwt_token = await self.authorization_service.refresh_token(
                 refresh_token,
@@ -134,7 +126,6 @@ class AuthorizationController(interface.IAuthorizationController):
                 samesite="lax"
             )
 
-            self.logger.info("Завершение операции обновления токена")
             return response
         except common.ErrAccountNotFound as err:
             self.logger.warning("Не найден аккаунт")
@@ -158,10 +149,10 @@ class AuthorizationController(interface.IAuthorizationController):
                 content={"message": "token invalid"}
             )
 
+    @auto_log()
     @traced_method()
     async def refresh_token_tg(self, request: Request):
         try:
-            self.logger.info("Начало операции обновления токена Telegram")
             refresh_token = request.cookies.get("Refresh-Token")
             jwt_token = await self.authorization_service.refresh_token_tg(
                 refresh_token,
@@ -183,7 +174,6 @@ class AuthorizationController(interface.IAuthorizationController):
                 samesite="lax"
             )
 
-            self.logger.info("Завершение операции обновления токена Telegram")
             return response
         except common.ErrAccountNotFound as err:
             self.logger.warning("Не найден аккаунт")

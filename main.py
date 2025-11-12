@@ -79,6 +79,7 @@ app = NewHTTP(
     authorization_controller,
     http_middleware,
     cfg.prefix,
+    cfg.environment
 )
 
 if __name__ == "__main__":
